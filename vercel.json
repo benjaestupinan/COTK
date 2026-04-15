@@ -1,5 +1,5 @@
 {
-  "installCommand": "pip install flask",
+  "installCommand": "pip install flask --break-system-packages",
   "buildCommand": "echo Build complete",
   "routes": [
     { "src": "/api/(.*)", "dest": "/api.py" },
