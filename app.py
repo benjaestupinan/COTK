@@ -2,30 +2,22 @@ from flask import Flask, jsonify, request
 import requests
 
 app = Flask(__name__)
+BIN_ID = "69e03278856a6821893b6c1d"
 
 
 @app.route("/api/data")
 def get_data():
     try:
-        res = requests.get(
-            "https://api.jsonbin.io/v3/b/69e03278856a6821893b6c1d/latest", timeout=10
-        )
-        record = res.json().get("record") if res.status_code == 200 else None
+        res = requests.get(f"https://api.jsonbin.io/v3/b/{BIN_ID}/latest")
+        if res.status_code != 200:
+            return jsonify({"names": [], "scores": {}})
+        record = res.json().get("record")
         if not record:
             return jsonify({"names": [], "scores": {}})
-        if "scores" not in record:
-            record["scores"] = {}
-        if "names" not in record:
-            record["names"] = []
-        return jsonify(record)
+        return jsonify(
+            {"names": record.get("names", []), "scores": record.get("scores", {})}
+        )
     except Exception:
-        return jsonify({"names": [], "scores": {}})
-        if "scores" not in record:
-            record["scores"] = {}
-        if "names" not in record:
-            record["names"] = []
-        return jsonify(record)
-    except:
         return jsonify({"names": [], "scores": {}})
 
 
@@ -39,32 +31,27 @@ def increment():
         if password != "pepito123":
             return jsonify({"error": "Contraseña incorrecta"}), 401
 
-        res = requests.get(
-            "https://api.jsonbin.io/v3/b/69e03278856a6821893b6c1d/latest", timeout=10
-        )
-        record = res.json().get("record") if res.status_code == 200 else None
+        res = requests.get(f"https://api.jsonbin.io/v3/b/{BIN_ID}/latest")
+        if res.status_code != 200:
+            return jsonify({"error": "Error al leer"}), 500
 
-        if not record:
-            record = {"names": [], "scores": {}}
+        record = res.json().get("record", {"names": [], "scores": {}})
+        scores = record.get("scores", {})
+        names = record.get("names", [])
 
-        if "scores" not in record:
-            record["scores"] = {}
-        if "names" not in record:
-            record["names"] = []
-
-        if name in record["scores"]:
-            record["scores"][name] += 1
+        if name in scores:
+            scores[name] += 1
         else:
-            record["scores"][name] = 1
-            record["names"].append(name)
+            scores[name] = 1
+            names.append(name)
 
         requests.put(
-            "https://api.jsonbin.io/v3/b/69e03278856a6821893b6c1d",
-            json=record,
+            f"https://api.jsonbin.io/v3/b/{BIN_ID}",
+            json={"names": names, "scores": scores},
             headers={"Content-Type": "application/json"},
-            timeout=10,
         )
-        return jsonify({"score": record["scores"][name]})
+
+        return jsonify({"score": scores[name]})
     except Exception:
         return jsonify({"error": "Error del servidor"}), 500
 
@@ -78,30 +65,24 @@ def add_name():
         if not name:
             return jsonify({"error": "Nombre requerido"}), 400
 
-        res = requests.get(
-            "https://api.jsonbin.io/v3/b/69e03278856a6821893b6c1d/latest", timeout=10
-        )
-        record = res.json().get("record") if res.status_code == 200 else None
+        res = requests.get(f"https://api.jsonbin.io/v3/b/{BIN_ID}/latest")
+        if res.status_code != 200:
+            return jsonify({"error": "Error al leer"}), 500
 
-        if not record:
-            record = {"names": [], "scores": {}}
+        record = res.json().get("record", {"names": [], "scores": {}})
+        names = record.get("names", [])
 
-        if "scores" not in record:
-            record["scores"] = {}
-        if "names" not in record:
-            record["names"] = []
-
-        if name in record["names"]:
+        if name in names:
             return jsonify({"error": "Nombre ya existe"}), 400
 
-        record["names"].append(name)
-        record["scores"][name] = 0
+        names.append(name)
+        scores = record.get("scores", {})
+        scores[name] = 0
 
         requests.put(
-            "https://api.jsonbin.io/v3/b/69e03278856a6821893b6c1d",
-            json=record,
+            f"https://api.jsonbin.io/v3/b/{BIN_ID}",
+            json={"names": names, "scores": scores},
             headers={"Content-Type": "application/json"},
-            timeout=10,
         )
 
         return jsonify({"success": True})
