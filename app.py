@@ -1,26 +1,26 @@
 import json
-import os
 import requests
 from flask import Flask, jsonify, request, send_from_directory
 
 app = Flask(__name__)
 
-BIN_ID = "69e02a3236566621a8ba3b11"
-API_KEY = "$2a$10$AhbCQtCSwmm/.5cmWoqs9O9LqiJlOq3ix4vK8s9AGnDPVv2B4xPNW"
-
+BIN_ID = "69e03278856a6821893b6c1d"
 BASE_URL = f"https://api.jsonbin.io/v3/b/{BIN_ID}"
 
 
 def load_data():
-    headers = {"X-Access-Key": API_KEY}
-    res = requests.get(BASE_URL, headers=headers)
+    res = requests.get(BASE_URL)
     if res.status_code == 200:
-        return res.json().get("record", {"names": [], "scores": {}})
-    return {"names": [], "scores": {}}
+        data = res.json().get("record")
+        if data:
+            return data
+    initial = {"names": [], "scores": {}}
+    save_data(initial)
+    return initial
 
 
 def save_data(data):
-    headers = {"X-Access-Key": API_KEY, "Content-Type": "application/json"}
+    headers = {"Content-Type": "application/json"}
     requests.put(BASE_URL, headers=headers, json=data)
 
 
@@ -35,6 +35,8 @@ def increment():
     name = request.json.get("name")
     password = request.json.get("password")
 
+    print(f"Increment request: {name}, data: {data}")
+
     if password != "pepito123":
         return jsonify({"error": "Contraseña incorrecta"}), 401
 
@@ -45,6 +47,7 @@ def increment():
         data["names"].append(name)
 
     save_data(data)
+    print(f"Saved: {data}")
     return jsonify({"score": data["scores"][name]})
 
 
