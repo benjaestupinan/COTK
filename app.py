@@ -9,24 +9,39 @@ BASE_URL = f"https://api.jsonbin.io/v3/b/{BIN_ID}"
 
 
 def load_data():
-    res = requests.get(BASE_URL)
-    if res.status_code == 200:
-        data = res.json().get("record")
-        if data:
-            return data
-    initial = {"names": [], "scores": {}}
-    save_data(initial)
-    return initial
+    try:
+        res = requests.get(BASE_URL, timeout=5)
+        if res.status_code == 200:
+            data = res.json().get("record")
+            if data:
+                return data
+        return {"names": [], "scores": {}}
+    except Exception as e:
+        print(f"load_data error: {e}")
+        return {"names": [], "scores": {}}
 
 
 def save_data(data):
-    headers = {"Content-Type": "application/json"}
-    requests.put(BASE_URL, headers=headers, json=data)
+    try:
+        headers = {"Content-Type": "application/json"}
+        res = requests.put(BASE_URL, headers=headers, json=data, timeout=5)
+        print(f"save_data response: {res.status_code}")
+        return res
+    except Exception as e:
+        print(f"save_data error: {e}")
 
 
 @app.route("/api/data")
 def get_data():
-    return jsonify(load_data())
+    print("get_data called")
+    data = load_data()
+    print(f"Returning: {data}")
+    return jsonify(data)
+
+
+@app.route("/api/ping")
+def ping():
+    return jsonify({"pong": True})
 
 
 @app.route("/api/increment", methods=["POST"])
@@ -35,7 +50,7 @@ def increment():
     name = request.json.get("name")
     password = request.json.get("password")
 
-    print(f"Increment request: {name}, data: {data}")
+    print(f"Increment: name={name}, data={data}")
 
     if password != "pepito123":
         return jsonify({"error": "Contraseña incorrecta"}), 401
@@ -47,7 +62,7 @@ def increment():
         data["names"].append(name)
 
     save_data(data)
-    print(f"Saved: {data}")
+    print(f"After save: {data}")
     return jsonify({"score": data["scores"][name]})
 
 
@@ -56,6 +71,8 @@ def add_name():
     data = load_data()
     name = request.json.get("name")
     password = request.json.get("password")
+
+    print(f"Add: name={name}, data={data}")
 
     if password != "pepito123":
         return jsonify({"error": "Contraseña incorrecta"}), 401
@@ -69,6 +86,7 @@ def add_name():
     data["names"].append(name)
     data["scores"][name] = 0
     save_data(data)
+    print(f"After add: {data}")
     return jsonify({"success": True})
 
 
