@@ -1,4 +1,4 @@
 {
   "framework": "flask",
-  "installCommand": "pip install flask --break-system-packages"
+  "installCommand": "pip install flask requests --break-system-packages"
 }
