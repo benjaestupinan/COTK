@@ -2,7 +2,7 @@ import json
 import os
 from flask import Flask, jsonify, request, send_from_directory
 
-app = Flask(__name__, static_folder=".", static_url_path="")
+app = Flask(__name__)
 DATA_FILE = "/tmp/data.json"
 
 
@@ -63,13 +63,14 @@ def add_name():
     return jsonify({"success": True})
 
 
-@app.route("/<path:path>")
-def serve(path=""):
-    from flask import send_from_directory
+@app.route("/")
+def index():
+    return send_from_directory(".", "index.html")
 
-    if path == "" or path == "index.html":
-        return send_from_directory(".", "index.html")
-    return send_from_directory(".", path)
+
+@app.route("/<path:filename>")
+def files(filename):
+    return send_from_directory(".", filename)
 
 
 # Vercel entrypoint
