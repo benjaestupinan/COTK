@@ -51,10 +51,6 @@ def increment():
 def add_name():
     data = request.json or {}
     name = data.get("name")
-    password = data.get("password")
-
-    if password != "pepito123":
-        return jsonify({"error": "Contraseña incorrecta"}), 401
 
     if not name:
         return jsonify({"error": "Nombre requerido"}), 400

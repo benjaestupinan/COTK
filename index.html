@@ -318,7 +318,7 @@
           const res = await fetch(API_URL + "/increment", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name: window.pendingName, password }),
+            body: JSON.stringify({ name: window.pendingName, password: PASSWORD }),
           });
           const result = await res.json();
           if (result.error) {
@@ -335,7 +335,7 @@
           const res = await fetch(API_URL + "/add", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, password }),
+            body: JSON.stringify({ name }),
           });
           const result = await res.json();
           if (result.error) {
