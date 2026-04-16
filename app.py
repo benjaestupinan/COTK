@@ -9,9 +9,14 @@ def get_data():
     res = requests.get(
         "https://api.jsonbin.io/v3/b/69e03278856a6821893b6c1d/latest", timeout=5
     )
-    if res.status_code == 200:
-        return jsonify(res.json().get("record", {"names": [], "scores": {}}))
-    return jsonify({"names": [], "scores": {}})
+    record = res.json().get("record") if res.status_code == 200 else None
+    if not record:
+        return jsonify({"names": [], "scores": {}})
+    if "scores" not in record:
+        record["scores"] = {}
+    if "names" not in record:
+        record["names"] = []
+    return jsonify(record)
 
 
 @app.route("/api/increment", methods=["POST"])
@@ -26,11 +31,15 @@ def increment():
     res = requests.get(
         "https://api.jsonbin.io/v3/b/69e03278856a6821893b6c1d/latest", timeout=5
     )
-    record = (
-        res.json().get("record", {"names": [], "scores": {}})
-        if res.status_code == 200
-        else {"names": [], "scores": {}}
-    )
+    record = res.json().get("record") if res.status_code == 200 else None
+
+    if not record:
+        record = {"names": [], "scores": {}}
+
+    if "scores" not in record:
+        record["scores"] = {}
+    if "names" not in record:
+        record["names"] = []
 
     if name in record["scores"]:
         record["scores"][name] += 1
@@ -58,11 +67,15 @@ def add_name():
     res = requests.get(
         "https://api.jsonbin.io/v3/b/69e03278856a6821893b6c1d/latest", timeout=5
     )
-    record = (
-        res.json().get("record", {"names": [], "scores": {}})
-        if res.status_code == 200
-        else {"names": [], "scores": {}}
-    )
+    record = res.json().get("record") if res.status_code == 200 else None
+
+    if not record:
+        record = {"names": [], "scores": {}}
+
+    if "scores" not in record:
+        record["scores"] = {}
+    if "names" not in record:
+        record["names"] = []
 
     if name in record["names"]:
         return jsonify({"error": "Nombre ya existe"}), 400
