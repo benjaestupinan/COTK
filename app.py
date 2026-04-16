@@ -5,12 +5,13 @@ from flask import Flask, jsonify, request, send_from_directory
 app = Flask(__name__)
 
 BIN_ID = "69e03278856a6821893b6c1d"
-BASE_URL = f"https://api.jsonbin.io/v3/b/{BIN_ID}"
+GET_URL = f"https://api.jsonbin.io/v3/b/{BIN_ID}/latest"
+PUT_URL = f"https://api.jsonbin.io/v3/b/{BIN_ID}"
 
 
 def load_data():
     try:
-        res = requests.get(BASE_URL, timeout=5)
+        res = requests.get(GET_URL, timeout=5)
         if res.status_code == 200:
             data = res.json().get("record")
             if data:
@@ -24,9 +25,8 @@ def load_data():
 def save_data(data):
     try:
         headers = {"Content-Type": "application/json"}
-        res = requests.put(BASE_URL, headers=headers, json=data, timeout=10)
+        res = requests.put(PUT_URL, headers=headers, json=data, timeout=10)
         res.raise_for_status()
-        print(f"save_data OK: {res.status_code}")
         return res
     except Exception as e:
         print(f"save_data error: {e}")
@@ -93,6 +93,19 @@ def add_name():
 
 
 @app.route("/")
+def index():
+    return send_from_directory(".", "index.html")
+
+
+@app.route("/<path:filename>")
+def files(filename):
+    return send_from_directory(".", filename)
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
+
+
 def index():
     return send_from_directory(".", "index.html")
 
