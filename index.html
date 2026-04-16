@@ -360,7 +360,21 @@
           alert("Ingresa un nombre");
           return;
         }
-        openModal("agregar", name);
+        
+        fetch(API_URL + "/add", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name }),
+        })
+        .then((res) => res.json())
+        .then((result) => {
+          if (result.error) {
+            alert(result.error);
+            return;
+          }
+          document.getElementById("newNameInput").value = "";
+          render();
+        });
       }
 
       render();
