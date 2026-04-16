@@ -268,16 +268,15 @@
       }
 
       async function render() {
-        const div = document.getElementById("entries");
-        div.innerHTML = '<div style="text-align:center;padding:20px;">🏀 Cargando...</div>';
+        const entriesDiv = document.getElementById("entries");
+        entriesDiv.innerHTML = '<p style="text-align:center;padding:20px;">🏀 Cargando...</p>';
         
         const data = await fetchData();
         const entries = data.names
           .map((n) => ({ name: n, score: data.scores[n] || 0 }))
           .sort((a, b) => b.score - a.score);
 
-        const div = document.getElementById("entries");
-        div.innerHTML = entries
+        entriesDiv.innerHTML = entries
           .map(
             (e, i) => `
               <div class="entry">
