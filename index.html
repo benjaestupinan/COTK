@@ -368,7 +368,7 @@
           return;
         }
         
-        const btn = event.target;
+        const btn = document.querySelector("button[onclick='addName()']");
         btn.disabled = true;
         btn.textContent = "🏀...";
         
